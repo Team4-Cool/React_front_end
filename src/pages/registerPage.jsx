@@ -1,5 +1,6 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import axios from 'axios';
 
 const RegisterForm = () => {
     const validationSchema = Yup.object({
@@ -8,20 +9,44 @@ const RegisterForm = () => {
         email: Yup.string()
             .email('Invalid email')
             .required('Email is required'),
-        password: Yup.string()
+        password1: Yup.string()
             .min(6, 'Password must be at least 6 characters')
-            .required('Password is required')
+            .required('Password is required'),
+        password2: Yup.string()
+            .oneOf([Yup.ref('password1'), null], 'Passwords must match')
+            .required('Confirm your password')
     });
 
     const formik = useFormik({
         initialValues: {
             username: '',
             email: '',
-            password: ''
+            password1: '',
+            password2: ''
         },
         validationSchema,
-        onSubmit: (values) => {
-            console.log('Form submitted:', values);
+        onSubmit: async (values, { setSubmitting, setErrors }) => {
+            try {
+                // Prepare the data to send to the API
+                const userData = {
+                    username: values.username,
+                    email: values.email,
+                    password1: values.password1,
+                    password2: values.password2
+                };
+
+                // Send the data to the API (replace 'http://your-ip-address/api/endpoint' with your actual backend URL)
+                const response = await axios.post('http://109.87.215.193:8000/auth/registration/', userData);
+
+                console.log('Registration successful:', response.data);
+                localStorage.setItem('token', response.data.key);
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Registration failed:', error.response?.data);
+                setErrors({ email: 'User with this email already exists' });
+            } finally {
+                setSubmitting(false);
+            }
         }
     });
 
@@ -62,23 +87,41 @@ const RegisterForm = () => {
                 </div>
 
                 <div className="mb-3">
-                    <label htmlFor="password" className="form-label">Password</label>
+                    <label htmlFor="password1" className="form-label">Password</label>
                     <input
                         type="password"
-                        id="password"
-                        name="password"
-                        className={`form-control ${formik.errors.password && formik.touched.password ? 'is-invalid' : ''}`}
-                        value={formik.values.password}
+                        id="password1"
+                        name="password1"
+                        className={`form-control ${formik.errors.password1 && formik.touched.password1 ? 'is-invalid' : ''}`}
+                        value={formik.values.password1}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                     />
-                    {formik.errors.password && formik.touched.password && (
-                        <div className="invalid-feedback">{formik.errors.password}</div>
+                    {formik.errors.password1 && formik.touched.password1 && (
+                        <div className="invalid-feedback">{formik.errors.password1}</div>
+                    )}
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="password2" className="form-label">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="password2"
+                        name="password2"
+                        className={`form-control ${formik.errors.password2 && formik.touched.password2 ? 'is-invalid' : ''}`}
+                        value={formik.values.password2}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                    />
+                    {formik.errors.password2 && formik.touched.password2 && (
+                        <div className="invalid-feedback">{formik.errors.password2}</div>
                     )}
                 </div>
 
                 <div className="text-center">
-                    <button type="submit" className="btn btn-primary">Register</button>
+                    <button type="submit" className="btn btn-primary" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? 'Registering...' : 'Register'}
+                    </button>
                 </div>
             </form>
         </div>
