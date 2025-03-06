@@ -1,27 +1,40 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext'; // Import the Auth context
 
-import MainLayout from './Layouts/MainLayout'
-import Home from './pages/home'
-import { Routes, Route } from 'react-router'
-
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import './App.css'
+import LoginFormPage from './pages/LoginPage';
 import StartNoLoginPage from './pages/StartNoLoginPage';
 import RegisterForm from './pages/registerPage';
-import LoginFormPage from './pages/LoginPage';
+
+import MainLayout from './Layouts/MainLayout';
+import Home from './pages/home';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
+import "./App.css";
+
 const App = () => {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<MainLayout />} >
-          <Route index element={<Home />} />
-        </Route>
-        <Route path='/start' element={<StartNoLoginPage/> }/>
-        <Route path='/register' element={<RegisterForm/>}/>
-        <Route path='/login' element={<LoginFormPage/>}/>
-      </Routes>
-    </>
-  )
-}
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+};
+
+const AppRoutes = () => {
+  const { user } = useAuth();  // Get the user from context
+  
+  return (
+    <Routes>
+      <Route path="/start" element={!user ? <StartNoLoginPage /> : <Navigate to="/home" />} />
+      <Route path="/register" element={!user ? <RegisterForm /> : <Navigate to="/home" />} />
+      <Route path="/login" element={!user ? <LoginFormPage /> : <Navigate to="/home" />} />
+      
+      {/* Protect the home page and main layout */}
+      <Route path="/" element={user ? <MainLayout /> : <Navigate to="/start" />}>
+        <Route path="/home" element={user ? <Home /> : <Navigate to="/start" />} />
+      </Route>
+    </Routes>
+  );
+};
 
 export default App;
