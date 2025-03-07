@@ -4,7 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import axios from "axios";
 import "./css/Column.css";
 
-const Task = ({ task, index, onEdit }) => {
+const Task = ({ task, index, onEdit, onDelete }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id: task.id,
     });
@@ -16,6 +16,7 @@ const Task = ({ task, index, onEdit }) => {
         background: "#e9ecef",
         borderRadius: "4px",
         cursor: "grab",
+        position: "relative",
     };
 
     return (
@@ -26,7 +27,25 @@ const Task = ({ task, index, onEdit }) => {
             {...listeners}
             onClick={() => onEdit(task)}
         >
-            {task.title}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>{task.title}</div>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();  // Prevent triggering edit
+                        onDelete(task.id);
+                    }}
+                    style={{
+                        background: "none",
+                        border: "none",
+                        color: "#dc3545",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        padding: "2px 6px",
+                    }}
+                >
+                    ×
+                </button>
+            </div>
         </div>
     );
 };
@@ -58,14 +77,63 @@ const Column = (props) => {
     };
 
     // Add new Task Card
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        if (!title.trim()) {
+            alert("Task title cannot be empty");
+            return;
+        }
+
         const columnId = props.column.id;
-        props.addNewTask({ title, description, columnId });
+        const taskData = {
+            title,
+            description,
+            columnId,
+            name: title  // Adding name property equal to title
+        };
+
+        try {
+            await props.addNewTask(taskData);
+            // Clear form fields after successful submission
+            setTitle("");
+            setDescription("");
+            setShowTaskCard(false);
+        } catch (error) {
+            console.error("Error adding task:", error);
+        }
     };
 
     // Edit task
     const handleEditTask = (task) => {
-        props.editTask(task);
+        props.editTask({
+            ...task,
+            name: task.title  // Ensure name is updated with title
+        });
+    };
+
+    // Delete task
+    const handleDeleteTask = async (taskId) => {
+        try {
+            const token = localStorage.getItem('token');
+            // Show confirmation dialog
+            if (window.confirm("Are you sure you want to delete this task?")) {
+                await axios.delete(
+                    `http://109.87.215.193:8000/api/tasks/${taskId}/`,
+                    {
+                        headers: {
+                            'Authorization': `Token ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                // If successful, update local state via parent component
+                if (props.onTaskDelete) {
+                    props.onTaskDelete(taskId);
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
     };
 
     // Start editing column title
@@ -93,6 +161,7 @@ const Column = (props) => {
                 `http://109.87.215.193:8000/api/columns/${props.column.id}/`,
                 {
                     title: newTitle,
+                    name: newTitle,  // Update both title and name
                     board: boardId
                 },
                 {
@@ -110,7 +179,7 @@ const Column = (props) => {
                 props.onColumnUpdate({
                     ...props.column,
                     title: newTitle,
-                    name: newTitle
+                    name: newTitle  // Update both title and name
                 });
             }
         } catch (error) {
@@ -251,16 +320,45 @@ const Column = (props) => {
                         <input
                             type="text"
                             placeholder="Give your task a title"
+                            value={title}
                             onChange={(e) => setTitle(e.target.value)}
                         />
                         <input
                             type="text"
                             placeholder="Description..."
+                            value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
-                        <button type="submit" onClick={() => handleSubmit()}>
-                            Done
-                        </button>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px" }}>
+                            <button
+                                type="button"
+                                onClick={() => setShowTaskCard(false)}
+                                style={{
+                                    backgroundColor: "#6c757d",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    padding: "4px 8px",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                onClick={() => handleSubmit()}
+                                style={{
+                                    backgroundColor: "#007bff",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    padding: "4px 8px",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Add Task
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -278,6 +376,7 @@ const Column = (props) => {
                             task={task}
                             index={index}
                             onEdit={handleEditTask}
+                            onDelete={handleDeleteTask}
                         />
                     ))}
                 </div>
@@ -285,24 +384,5 @@ const Column = (props) => {
         </div>
     );
 };
-
-// Add this to your Column.css file
-const cssToAdd = `
-.column-title-text:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.title-edit-container input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.title-save-btn:hover {
-    background-color: #218838;
-}
-
-.title-cancel-btn:hover {
-    background-color: #c82333;
-}
-`;
 
 export default Column;
