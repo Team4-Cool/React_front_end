@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'; // Import the Au
 import LoginFormPage from './pages/LoginPage';
 import StartNoLoginPage from './pages/StartNoLoginPage';
 import RegisterForm from './pages/registerPage';
-
+import AccountInfoPage from "./pages/AccountInfoPage";
 import MainLayout from './Layouts/MainLayout';
 import Home from './pages/home';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -34,6 +34,7 @@ const AppRoutes = () => {
             <Route path="/" element={user ? <MainLayout /> : <Navigate to="/start" />}>
                 <Route path="/home" element={user ? <Home /> : <Navigate to="/start" />} />
                 <Route path="/boards/:id" element={user ? <BoardView /> : <Navigate to="/start" />} />
+                <Route path="/account" element={user ? <AccountInfoPage /> : <Navigate to="/start" />} /> 
             </Route>
         </Routes>
     );

@@ -26,7 +26,7 @@ const LoginFormPage = () => {
         onSubmit: async (values, { setSubmitting, setErrors }) => {
             try {
                 // Sending username, email, and password in the request
-                const response = await axios.post('http://109.87.215.193:8000/auth/login/', values);
+                const response = await axios.post('http://127.0.0.1:8000/auth/login/', values);
                 console.log('Login successful:', response.data);
 
                 // Save the token and set the user in context

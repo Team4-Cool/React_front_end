@@ -14,14 +14,14 @@ const Home = () => {
     }, [token]);
 
     const fetchBoards = () => {
-        axios.get('http://109.87.215.193:8000/api/boards', {
+        axios.get('http://127.0.0.1:8000/api/boards', {
             headers: { Authorization: `Token ${token}` }
         })
             .then(response => {
                 setBoards(response.data);
                 response.data.forEach(board => {
                     if (!users[board.owner]) {
-                        axios.get(`http://109.87.215.193:8000/api/users/${board.owner}`, {
+                        axios.get(`http://127.0.0.1:8000/api/users/${board.owner}`, {
                             headers: { Authorization: `Token ${token}` }
                         })
                             .then(userResponse => {
@@ -35,7 +35,7 @@ const Home = () => {
     };
 
     const createBoard = () => {
-        axios.post('http://109.87.215.193:8000/api/boards/', { name: newBoardName }, {
+        axios.post('http://127.0.0.1:8000/api/boards/', { name: newBoardName }, {
             headers: { Authorization: `Token ${token}` }
         })
             .then(() => {
@@ -46,7 +46,7 @@ const Home = () => {
     };
 
     const updateBoard = (id, newName) => {
-        axios.patch(`http://109.87.215.193:8000/api/boards/${id}/`, { name: newName }, {
+        axios.patch(`http://127.0.0.1:8000/api/boards/${id}/`, { name: newName }, {
             headers: { Authorization: `Token ${token}` }
         })
             .then(fetchBoards)
@@ -54,7 +54,7 @@ const Home = () => {
     };
 
     const deleteBoard = (id) => {
-        axios.delete(`http://109.87.215.193:8000/api/boards/${id}/`, {
+        axios.delete(`http://127.0.0.1:8000/api/boards/${id}/`, {
             headers: { Authorization: `Token ${token}` }
         })
             .then(fetchBoards)

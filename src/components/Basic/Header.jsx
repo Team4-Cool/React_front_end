@@ -16,7 +16,7 @@ export default function Header() {
     }
   
     try {
-      const response = await axios.get('http://109.87.215.193:8000/auth/user/', {
+      const response = await axios.get('http://127.0.0.1:8000/auth/user/', {
         headers: {
             Authorization: `Token ${token}` // Include the token in the Authorization header
         },
@@ -68,7 +68,9 @@ export default function Header() {
                 // If the user is logged in, show welcome message and user data
                 <>
                   <li className="nav-item">
-                    <span className="nav-link">Welcome, {userData ? userData.username : user.email}</span>
+                    <Link className="nav-link" to="/account">
+                      Welcome, {userData ? userData.username : user.email}
+                    </Link>
                   </li>
                   <li className="nav-item">
                     <button

@@ -36,7 +36,7 @@ const RegisterForm = () => {
                 };
 
                 // Send the data to the API (replace 'http://your-ip-address/api/endpoint' with your actual backend URL)
-                const response = await axios.post('http://109.87.215.193:8000/auth/registration/', userData);
+                const response = await axios.post('http://127.0.0.1:8000/auth/registration/', userData);
 
                 console.log('Registration successful:', response.data);
                 localStorage.setItem('token', response.data.key);

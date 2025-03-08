@@ -117,7 +117,7 @@ const Column = (props) => {
             // Show confirmation dialog
             if (window.confirm("Are you sure you want to delete this task?")) {
                 await axios.delete(
-                    `http://109.87.215.193:8000/api/tasks/${taskId}/`,
+                    `http://127.0.0.1:8000/api/tasks/${taskId}/`,
                     {
                         headers: {
                             'Authorization': `Token ${token}`,
@@ -158,7 +158,7 @@ const Column = (props) => {
             setIsEditingTitle(false);
 
             const response = await axios.put(
-                `http://109.87.215.193:8000/api/columns/${props.column.id}/`,
+                `http://127.0.0.1:8000/api/columns/${props.column.id}/`,
                 {
                     title: newTitle,
                     name: newTitle,  // Update both title and name

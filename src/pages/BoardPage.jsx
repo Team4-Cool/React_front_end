@@ -36,7 +36,7 @@ const BoardView = () => {
     const availableLabels = []; // Replace with actual label IDs from your system
 
     const token = localStorage.getItem('token');
-    const API_BASE_URL = "http://109.87.215.193:8000/api";
+    const API_BASE_URL = "http://127.0.0.1:8000/api";
 
     const fetchBoard = () => {
         setLoading(true);
